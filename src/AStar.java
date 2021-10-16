@@ -1,12 +1,9 @@
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 
-public class BestFirst extends InformedSearch {
+public class AStar extends InformedSearch {
 
-    public BestFirst(String[][] Matriz, Operator[] Operadores) {
-        super(Matriz, Operadores);
+    public AStar(String [][] map, Operator[] operadores) {
+        super(map, operadores);
     }
 
     public Collection<Tupla> setNewStructure(){
@@ -29,16 +26,19 @@ public class BestFirst extends InformedSearch {
 
     @Override
     public void add(Tupla trip, Collection<Tupla> ListaPendientes) {
-        if ( !ListaPendientes.contains(trip)){
-            ListaPendientes.add(trip);
-            ((ArrayList) ListaPendientes).sort(getComparator());
-        }
-
+        ListaPendientes.add(trip);
+        ((ArrayList) ListaPendientes).sort(getComparator());
     }
 
     @Override
     public void delete_node(Tupla trip, Collection<Tupla> ListaPendientes) {
         ((ArrayList) ListaPendientes).remove(0);
     }
+
+    @Override
+    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado){
+        return super.calcular_valor_estimado(current_node, final_node, 0) + costeAcumulado;
+    }
+
 
 }

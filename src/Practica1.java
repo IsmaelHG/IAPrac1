@@ -21,7 +21,7 @@ public class Practica1 {
         ops[3] = new Operator(1,0,"derecha");
 
         BestFirst bf = new BestFirst(map, ops);
-        ArrayList<Nodo> solucion_bf = bf.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(0,1,Cost.translate(map[1][0].charAt(0)), map[1][0]));
+        ArrayList<Nodo> solucion_bf = bf.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
 
         if (solucion_bf != null){
             System.out.print("Camino encontrado por el algoritmo Best First:\n");
@@ -29,6 +29,16 @@ public class Practica1 {
         }
         else{
             System.out.print("No se ha podido encontrar solución con el algoritmo Best first.");
+        }
+
+        AStar a_est = new AStar(map, ops);
+        ArrayList<Nodo> solucion_aEst = a_est.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
+        if (solucion_bf != null) {
+            System.out.print("Camino encontrado por el algoritmo A estrella:\n");
+            solucion_aEst.forEach(Nodo -> System.out.println(Nodo.toString()));
+        }
+        else{
+            System.out.print("No se ha podido encontrar solución con el algoritmo A estrella.");
         }
     }
 }

@@ -13,9 +13,7 @@ public class ReadFile {
         for (int i=0; i < row; i++) {
             line = reader.readLine();
             sliced = line.split(",");
-            for (int j=0; j < col; j++) {
-                map[i][j] = sliced[j];
-            }
+            System.arraycopy(sliced, 0, map[i], 0, col);
         }
 
         return map;

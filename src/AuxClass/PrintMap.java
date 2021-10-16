@@ -2,9 +2,9 @@ package AuxClass;
 
 public class PrintMap {
     public static void print(String[][] map) {
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                System.out.print(map[i][j] + " ");
+        for (String[] strings : map) {
+            for (String string : strings) {
+                System.out.print(string + " ");
             }
             System.out.println();
         }

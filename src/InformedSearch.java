@@ -22,7 +22,7 @@ public abstract class InformedSearch {
         Collection<Tupla> ListaPendientes = setNewStructure();
         HashSet<Nodo> ListaTratados = new HashSet<>();
 
-        Nodo current_node = nodo_inicial;
+        Nodo current_node;
         ArrayList<Nodo> current_camino = new ArrayList<>();
         int coste = 0;
         int valHeu = 0;
@@ -48,7 +48,8 @@ public abstract class InformedSearch {
                 ArrayList<Nodo> sucesores = getSucesores(current_node);
                 for(Nodo succ: sucesores){
                     if (!ListaTratados.contains(succ)){
-                        ArrayList<Nodo> new_camino = (ArrayList<Nodo>) current_camino.clone();
+                        ArrayList<Nodo> new_camino;
+                        new_camino = (ArrayList<Nodo>) current_camino.clone();
                         new_camino.add(current_node);
                         coste = current_tup.getCosteAcumulado() + calcular_coste(current_node, succ);
                         valHeu = calcular_valor_estimado(succ, nodo_final, coste);
@@ -72,22 +73,6 @@ public abstract class InformedSearch {
         return calcular_heuristicaV3(current_node, final_node);
     }
 
-    public int calcular_heuristicaV1(Nodo current_node, Nodo final_node){
-        /*
-            Shortest path
-         */
-        int final_coors = final_node.getX() * final_node.getY();
-        int current_coors = current_node.getX() * current_node.getY();
-        return final_coors - current_coors;
-    }
-
-    public int calcular_heuristicaV2(Nodo current_node, Nodo final_node){
-        /*
-            Flattest path
-         */
-        return 0;
-    }
-
     public int calcular_heuristicaV3(Nodo current_node, Nodo final_node){
         /*
             Fastest (least costly) path
@@ -108,7 +93,7 @@ public abstract class InformedSearch {
     public abstract void delete_node(Tupla trip, Collection<Tupla> ListaPendientes);
 
     public ArrayList<Nodo> getSucesores(Nodo nodo_actual){
-        ArrayList<Nodo> sucesores = new ArrayList<Nodo>();
+        ArrayList<Nodo> sucesores = new ArrayList<>();
         for (Operator oper: operadores){
             int next_x = nodo_actual.getX() + oper.getIncrX();
             int next_y =  nodo_actual.getY() + oper.getIncrY();
@@ -145,7 +130,7 @@ class Tupla {
         return this.camino;
     }
 
-    public int getCosteAcumulado() { return this.costeAcumulado;};
+    public int getCosteAcumulado() { return this.costeAcumulado;}
 
     public int getValorHeuristico(){
         return this.valorHeuristico;
@@ -156,7 +141,7 @@ class Tupla {
         boolean same = false;
         if (object != null){
             if (object instanceof Nodo) {
-                same = (this.node.equals((Nodo) object));
+                same = (this.node.equals(object));
             }
             else if (object instanceof Tupla){
                 same = (this.node.equals(((Tupla) object).getNodo())) && this.camino.equals(((Tupla) object).getCamino());
@@ -197,7 +182,7 @@ class Tupla {
         @Override
         public boolean equals(Object object){
             boolean same = false;
-            if (object != null && object instanceof Nodo) {
+            if (object instanceof Nodo) {
                 same = (this.X == ((Nodo) object).getX()) && (this.Y == ((Nodo) object).getY())
                         && (this.value == ((Nodo) object).getValue());
             }
@@ -232,7 +217,4 @@ class Tupla {
             return this.incrY;
         }
 
-        public String getName() {
-            return this.name;
-        }
-}
+    }
