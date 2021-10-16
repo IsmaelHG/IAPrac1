@@ -1,5 +1,4 @@
 import AuxClass.Cost;
-import AuxClass.PrintMap;
 import AuxClass.ReadFile;
 
 import java.io.IOException;
@@ -25,7 +24,8 @@ public class Practica1 {
 
         if (solucion_bf != null){
             System.out.print("Camino encontrado por el algoritmo Best First:\n");
-            solucion_bf.forEach(Nodo -> System.out.println(Nodo.toString()));
+            //solucion_bf.forEach(Nodo -> System.out.println(Nodo.toString()));
+            PrintMap.printpath(solucion_bf, map);
         }
         else{
             System.out.print("No se ha podido encontrar solución con el algoritmo Best first.");
@@ -33,9 +33,10 @@ public class Practica1 {
 
         AStar a_est = new AStar(map, ops);
         ArrayList<Nodo> solucion_aEst = a_est.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
-        if (solucion_bf != null) {
+        if (solucion_aEst != null) {
             System.out.print("Camino encontrado por el algoritmo A estrella:\n");
-            solucion_aEst.forEach(Nodo -> System.out.println(Nodo.toString()));
+            //solucion_aEst.forEach(Nodo -> System.out.println(Nodo.toString()));
+            PrintMap.printpath(solucion_aEst, map);
         }
         else{
             System.out.print("No se ha podido encontrar solución con el algoritmo A estrella.");
