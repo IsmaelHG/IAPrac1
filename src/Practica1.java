@@ -5,41 +5,37 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Practica1 {
+    // Fichero que contiene el mapa
     private static final String filepath = "mapa1.txt";
-    private static final int maxsize = 10;
+
+    // Tamaño mapa
+    private static final int maxsizeX = 10;
+    private static final int maxsizeY = 10;
 
     public static void main(String[] args) throws IOException {
-        String[][] map = ReadFile.ReadMap(filepath, maxsize, maxsize);
+        String[][] map = ReadFile.ReadMap(filepath, maxsizeX, maxsizeY);
         System.out.println("MAPA ESCOGIDO:");
         PrintMap.print(map);
 
-        Operator[] ops = new Operator[4];
-        ops[0] = new Operator(0,1,"abajo");
-        ops[1] = new Operator(0,-1,"arriba");
-        ops[2] = new Operator(-1,0,"izquierda");
-        ops[3] = new Operator(1,0,"derecha");
+        BestFirst best_first = new BestFirst(map);
+        AStar a_estrella = new AStar(map);
 
-        BestFirst bf = new BestFirst(map, ops);
-        ArrayList<Nodo> solucion_bf = bf.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
+        ArrayList<Nodo> path_best = best_first.encontrarCamino(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
 
-        if (solucion_bf != null){
-            System.out.print("Camino encontrado por el algoritmo Best First:\n");
-            //solucion_bf.forEach(Nodo -> System.out.println(Nodo.toString()));
-            PrintMap.printpath(solucion_bf, map);
-        }
-        else{
+        if (path_best == null) {
             System.out.print("No se ha podido encontrar solución con el algoritmo Best first.");
+        } else {
+            System.out.print("Camino encontrado por el algoritmo Best First:\n");
+            PrintMap.printpath(path_best, map);
         }
 
-        AStar a_est = new AStar(map, ops);
-        ArrayList<Nodo> solucion_aEst = a_est.buscarNodo(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
-        if (solucion_aEst != null) {
-            System.out.print("Camino encontrado por el algoritmo A estrella:\n");
-            //solucion_aEst.forEach(Nodo -> System.out.println(Nodo.toString()));
-            PrintMap.printpath(solucion_aEst, map);
+        ArrayList<Nodo> path_a = a_estrella.encontrarCamino(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
+        if (path_a == null) {
+            System.out.print("No se ha podido encontrar solución con el algoritmo A*.");
         }
-        else{
-            System.out.print("No se ha podido encontrar solución con el algoritmo A estrella.");
+        else {
+            System.out.print("Camino encontrado por el algoritmo A estrella:\n");
+            PrintMap.printpath(path_a, map);
         }
     }
 }

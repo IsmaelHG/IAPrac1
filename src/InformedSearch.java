@@ -1,24 +1,20 @@
 import AuxClass.Cost;
+import AuxClass.Operacion;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class InformedSearch {
     String[][] map; // (y,x)
-    Operator[] operadores;
     int maxX;
     int maxY;
 
-    public InformedSearch(String[][] map, Operator[] operadores) {
+    public InformedSearch(String[][] map) {
         this.map = map;
-        this.operadores = operadores;
         this.maxX = map[0].length; // Asumme that all the cols have the same length
         this.maxY = map.length;
     }
 
-    public ArrayList<Nodo> buscarNodo(Nodo nodo_inicial, Nodo nodo_final){
+    public ArrayList<Nodo> encontrarCamino(Nodo nodo_inicial, Nodo nodo_final){
         Collection<Tupla> ListaPendientes = setNewStructure();
         HashSet<Nodo> ListaTratados = new HashSet<>();
 
@@ -63,7 +59,16 @@ public abstract class InformedSearch {
         return solucion;
     }
 
-    public abstract Collection<Tupla> setNewStructure();
+    public Collection<Tupla> setNewStructure() { return new ArrayList<>(); }
+
+    protected Comparator<Tupla> getComparator() {
+        return (o1, o2) -> {
+            float v1, v2;
+            v1 =  o1.getValorHeuristico();
+            v2 = o2.getValorHeuristico();
+            return Float.compare(v1, v2);  //(o1.node.X * o1.node.Y) < o2.v3 ? -1 : o1.v3 > o2.v3 ? 1 : 0;
+        };
+    }
 
     public abstract Tupla next_trip(Collection<Tupla> ListaPendientes);
 
@@ -94,9 +99,9 @@ public abstract class InformedSearch {
 
     public ArrayList<Nodo> getSucesores(Nodo nodo_actual){
         ArrayList<Nodo> sucesores = new ArrayList<>();
-        for (Operator oper: operadores){
-            int next_x = nodo_actual.getX() + oper.getIncrX();
-            int next_y =  nodo_actual.getY() + oper.getIncrY();
+        for (Operacion op: Operacion.values()){
+            int next_x = nodo_actual.getX() + op.getDesplX();
+            int next_y =  nodo_actual.getY() + op.getDesplY();
             if (next_x >= 0 && next_x < maxX && next_y >= 0 && next_y < maxY ){
                 if (!Objects.equals(map[next_y][next_x], "X")){
                     int value = Cost.translate(map[next_y][next_x].charAt(0));
@@ -194,27 +199,6 @@ class Tupla {
 
         public String toString() {
             return "(x: "+this.X+", y: "+this.Y+", value: "+this.value+")";
-        }
-
-    }
-
-    class Operator{
-        int incrX;
-        int incrY;
-        String name;
-
-        public Operator(int incrX, int incrY, String name){
-            this.incrX = incrX;
-            this.incrY = incrY;
-            this.name = name;
-        }
-
-        public int getIncrX(){
-            return this.incrX;
-        }
-
-        public int getIncrY(){
-            return this.incrY;
         }
 
     }

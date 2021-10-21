@@ -1,22 +1,21 @@
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
+/**
+ *
+ * Algoritmo de busqueda informada A*
+ *
+ */
 public class AStar extends InformedSearch {
 
-    public AStar(String [][] map, Operator[] operadores) {
-        super(map, operadores);
-    }
-
-    public Collection<Tupla> setNewStructure(){
-        return new ArrayList<>();
-    }
-
-    protected Comparator<Tupla> getComparator() {
-        return (o1, o2) -> {
-            float v1, v2;
-            v1 =  o1.getValorHeuristico();
-            v2 = o2.getValorHeuristico();
-            return Float.compare(v1, v2);  //(o1.node.X * o1.node.Y) < o2.v3 ? -1 : o1.v3 > o2.v3 ? 1 : 0;
-        };
+    /**
+     *
+     * Inicializa el algoritmo de bussqueda
+     *
+     * @param map Mapa
+     */
+    public AStar(String [][] map) {
+        super(map);
     }
 
     @Override
