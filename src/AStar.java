@@ -7,15 +7,14 @@ import java.util.Collection;
  *
  */
 public class AStar extends InformedSearch {
-
     /**
      *
      * Inicializa el algoritmo de bussqueda
      *
      * @param map Mapa
      */
-    public AStar(String [][] map) {
-        super(map);
+    public AStar(String [][] map, int heuristica) {
+        super(map, heuristica);
     }
 
     @Override
@@ -35,8 +34,8 @@ public class AStar extends InformedSearch {
     }
 
     @Override
-    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado){
-        return super.calcular_valor_estimado(current_node, final_node, 0) + costeAcumulado;
+    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica){
+        return super.calcular_valor_estimado(current_node, final_node, 0, heuristica) + costeAcumulado;
     }
 
 

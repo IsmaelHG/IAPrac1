@@ -14,8 +14,8 @@ public class BestFirst extends InformedSearch {
      *
      * @param map Mapa
      */
-    public BestFirst(String[][] map) {
-        super(map);
+    public BestFirst(String[][] map, int heuristica) {
+        super(map, heuristica);
     }
 
     @Override

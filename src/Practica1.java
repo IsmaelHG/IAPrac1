@@ -17,8 +17,8 @@ public class Practica1 {
         System.out.println("MAPA ESCOGIDO:");
         PrintMap.print(map);
 
-        BestFirst best_first = new BestFirst(map);
-        AStar a_estrella = new AStar(map);
+        BestFirst best_first = new BestFirst(map, 1);
+        AStar a_estrella = new AStar(map, 1);
 
         ArrayList<Nodo> path_best = best_first.encontrarCamino(new Nodo(0,0, Cost.translate(map[0][0].charAt(0)),map[0][0]), new Nodo(9,9,Cost.translate(map[9][9].charAt(0)), map[9][9]));
 

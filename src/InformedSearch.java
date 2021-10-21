@@ -7,11 +7,13 @@ public abstract class InformedSearch {
     String[][] map; // (y,x)
     int maxX;
     int maxY;
+    private final int heuristica;
 
-    public InformedSearch(String[][] map) {
+    public InformedSearch(String[][] map, int heuristica) {
         this.map = map;
         this.maxX = map[0].length; // Asumme that all the cols have the same length
         this.maxY = map.length;
+        this.heuristica =  heuristica;
     }
 
     public ArrayList<Nodo> encontrarCamino(Nodo nodo_inicial, Nodo nodo_final){
@@ -44,11 +46,10 @@ public abstract class InformedSearch {
                 ArrayList<Nodo> sucesores = getSucesores(current_node);
                 for(Nodo succ: sucesores){
                     if (!ListaTratados.contains(succ)){
-                        ArrayList<Nodo> new_camino;
-                        new_camino = (ArrayList<Nodo>) current_camino.clone();
+                        ArrayList<Nodo> new_camino = new ArrayList<>(current_camino);
                         new_camino.add(current_node);
                         coste = current_tup.getCosteAcumulado() + calcular_coste(current_node, succ);
-                        valHeu = calcular_valor_estimado(succ, nodo_final, coste);
+                        valHeu = calcular_valor_estimado(succ, nodo_final, coste, this.heuristica);
                         add(new Tupla(succ, coste, new_camino,valHeu), ListaPendientes);
                     }
                 }
@@ -72,19 +73,13 @@ public abstract class InformedSearch {
 
     public abstract Tupla next_trip(Collection<Tupla> ListaPendientes);
 
-    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado){
-        //return calcular_heuristicaV1(current_node, final_node);
-        //return calcular_heuristicaV2(current_node, final_node);
-        return calcular_heuristicaV3(current_node, final_node);
-    }
+    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica){
 
-    public int calcular_heuristicaV3(Nodo current_node, Nodo final_node){
-        /*
-            Fastest (least costly) path
-         */
-        return calcular_coste(current_node, final_node);
+        return switch (heuristica) {
+            case 1, 2, 3 -> calcular_coste(current_node, final_node);
+            default -> throw new IllegalStateException("Unexpected value: " + heuristica);
+        };
     }
-
 
     public int calcular_coste(Nodo nodo_orig, Nodo nodo_desti){
         int value = nodo_desti.getValue();
