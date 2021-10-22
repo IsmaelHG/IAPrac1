@@ -13,7 +13,7 @@ public class Cost {
      * @param c Tipo casilla
      * @return Coste (tiempo)
      */
-    public static int translate (char c) {
+    public static int translate(char c) {
 
         return switch (c) {
             case 'A' -> 1;

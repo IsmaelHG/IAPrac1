@@ -30,26 +30,33 @@ public abstract class InformedSearch {
         ArrayList<Nodo> solucion = null;
         boolean found=false;
         while (!found && !ListaPendientes.isEmpty()) {
+
             current_tup = next_trip(ListaPendientes);
             current_node = current_tup.getNodo();
             current_camino = current_tup.getCamino();
 
             delete_node(current_tup, ListaPendientes);
 
+            // Si nos encontramos con el nodo final, habremos terminado.
             if (current_node.equals(nodo_final)){
                 found=true;
                 solucion = current_camino;
+                solucion.add(current_node);
                 System.out.println("\nNº de nodos tratados: "+ListaTratados.size());
                 System.out.println("Coste (tiempo) total por este camino: "+current_tup.getCosteAcumulado());
             }
             else {
                 ArrayList<Nodo> sucesores = getSucesores(current_node);
+                // Iteramos sobre todos los sucesores disponibles
                 for(Nodo succ: sucesores){
+                    // Ignoramos las casillas ya tratadas
                     if (!ListaTratados.contains(succ)){
+
                         ArrayList<Nodo> new_camino = new ArrayList<>(current_camino);
                         new_camino.add(current_node);
                         coste = current_tup.getCosteAcumulado() + calcular_coste(current_node, succ);
                         valHeu = calcular_valor_estimado(succ, nodo_final, coste, this.heuristica);
+                        // Añadimos nodo
                         add(new Tupla(succ, coste, new_camino,valHeu), ListaPendientes);
                     }
                 }
@@ -57,6 +64,7 @@ public abstract class InformedSearch {
             }
         }
 
+        // Retornamos la solucion (null si no encontramos ningun camino)
         return solucion;
     }
 
@@ -74,15 +82,23 @@ public abstract class InformedSearch {
     public abstract Tupla next_trip(Collection<Tupla> ListaPendientes);
 
     public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica){
-
+        // Calculamos el coste de desplazamiento en función de la heuristica que hayamos tomado
         return switch (heuristica) {
-            case 1, 2, 3 -> calcular_coste(current_node, final_node);
+            // Heuristica 1: Escogemos el desplazamiento con menor coste
+            case 1 -> calcular_coste(current_node, final_node);
+            // Heuristica 2:
+            case 2 -> calcular_coste(current_node, final_node);
+            // Heuristica 3:
+            case 3 -> calcular_coste(current_node, final_node);
+            // Heuristica invalida
             default -> throw new IllegalStateException("Unexpected value: " + heuristica);
         };
     }
 
     public int calcular_coste(Nodo nodo_orig, Nodo nodo_desti){
+        // Conseguimos el coste de desplazamiento del nodo destino
         int value = nodo_desti.getValue();
+        // Si hacemos un cambio de carretera, añadiremos "5" al coste
         if ( !nodo_orig.getType().equals(nodo_desti.getType()) ) { value += 5; }
 
         return value;
@@ -94,16 +110,21 @@ public abstract class InformedSearch {
 
     public ArrayList<Nodo> getSucesores(Nodo nodo_actual){
         ArrayList<Nodo> sucesores = new ArrayList<>();
+        // Iteramos sobre los movimientos permitidos
         for (Operacion op: Operacion.values()){
             int next_x = nodo_actual.getX() + op.getDesplX();
             int next_y =  nodo_actual.getY() + op.getDesplY();
+            // Comprobamos que el siguiente movimiento no salga del mapa
             if (next_x >= 0 && next_x < maxX && next_y >= 0 && next_y < maxY ){
+                // Si la casilla no es una "X", la añadiremos como posible sucesor
                 if (!Objects.equals(map[next_y][next_x], "X")){
                     int value = Cost.translate(map[next_y][next_x].charAt(0));
                     sucesores.add(new Nodo(next_x, next_y, value, map[next_y][next_x]));
                 }
             }
         }
+
+        // Retornamos la lista
         return sucesores;
     }
 
@@ -112,8 +133,7 @@ public abstract class InformedSearch {
 class Tupla {
     Nodo node;
     ArrayList<Nodo> camino;
-    int valorHeuristico;
-    int costeAcumulado;
+    int valorHeuristico, costeAcumulado;
 
     public Tupla(Nodo estado, int costeAcumulado, ArrayList<Nodo> camino, int valorHeuristico){
         this.node = estado;
@@ -122,6 +142,23 @@ class Tupla {
         this.valorHeuristico = valorHeuristico;
     }
 
+
+    @Override
+    public boolean equals(Object object){
+        if (object instanceof Nodo) {
+            return (this.node.equals(object));
+        }
+        else if (object instanceof Tupla){
+            // Retornaremos true si el camino es exactamente igual (misma ruta tomada de Nodos)
+            return (this.node.equals(((Tupla) object).getNodo())) && this.camino.equals(((Tupla) object).getCamino());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() { return this.node.hashCode() + this.camino.hashCode();}
+
+    // Getters
     public Nodo getNodo(){
         return this.node;
     }
@@ -135,33 +172,9 @@ class Tupla {
     public int getValorHeuristico(){
         return this.valorHeuristico;
     }
-
-    @Override
-    public boolean equals(Object object){
-        boolean same = false;
-        if (object != null){
-            if (object instanceof Nodo) {
-                same = (this.node.equals(object));
-            }
-            else if (object instanceof Tupla){
-                same = (this.node.equals(((Tupla) object).getNodo())) && this.camino.equals(((Tupla) object).getCamino());
-                //This way of compare the caminos is dependable of the order, that means that it will return true
-                //only if all the ordered pairs of Nodo instances are equal.
-            }
-        }
-
-        return same;
-    }
-
-    @Override
-    public int hashCode() { return this.node.hashCode() + this.camino.hashCode();}
-
 }
-
-    class Nodo{
-        int X;
-        int Y;
-        int value;
+    class Nodo {
+        int X,Y,value;
         String type;
 
         public Nodo(int X, int Y, int value, String type){
@@ -171,6 +184,7 @@ class Tupla {
             this.type = type;
         }
 
+        // Getters
         public int getX() {return this.X;}
 
         public int getY() {return this.Y;}
@@ -181,19 +195,15 @@ class Tupla {
 
         @Override
         public boolean equals(Object object){
-            boolean same = false;
             if (object instanceof Nodo) {
-                same = (this.X == ((Nodo) object).getX()) && (this.Y == ((Nodo) object).getY())
+                return (this.X == ((Nodo) object).getX()) && (this.Y == ((Nodo) object).getY())
                         && (this.value == ((Nodo) object).getValue());
+            } else {
+                return false;
             }
-            return same;
         }
 
         @Override
-        public int hashCode() {return this.X * this.Y * this.value;}
-
-        public String toString() {
-            return "(x: "+this.X+", y: "+this.Y+", value: "+this.value+")";
-        }
+        public int hashCode() { return (X+Y) * (value); }
 
     }
