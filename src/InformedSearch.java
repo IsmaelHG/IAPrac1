@@ -11,64 +11,62 @@ public abstract class InformedSearch {
 
     public InformedSearch(String[][] map, int heuristica) {
         this.map = map;
-        this.maxX = map[0].length; // Asumme that all the cols have the same length
+        this.maxX = map[0].length;
         this.maxY = map.length;
         this.heuristica =  heuristica;
     }
 
     public ArrayList<Nodo> encontrarCamino(Nodo nodo_inicial, Nodo nodo_final){
-        Collection<Tupla> ListaPendientes = setNewStructure();
-        HashSet<Nodo> ListaTratados = new HashSet<>();
+        ArrayList<Tupla> Pendientes = new ArrayList<>();
+        HashSet<Nodo> Tratados = new HashSet<>();
 
         Nodo current_node;
-        ArrayList<Nodo> current_camino = new ArrayList<>();
-        int coste = 0;
+        ArrayList<Nodo> curr_path = new ArrayList<>();
+        int tiempo = 0;
         int valHeu = 0;
-        Tupla current_tup = new Tupla(nodo_inicial, coste, current_camino, valHeu);
-        ListaPendientes.add(current_tup);
+        Tupla curr_tupl = new Tupla(nodo_inicial, tiempo, curr_path, valHeu);
+        Pendientes.add(curr_tupl);
 
         ArrayList<Nodo> solucion = null;
-        boolean found=false;
-        while (!found && !ListaPendientes.isEmpty()) {
+        boolean trobat=false;
+        while (!trobat && !Pendientes.isEmpty()) {
 
-            current_tup = next_trip(ListaPendientes);
-            current_node = current_tup.getNodo();
-            current_camino = current_tup.getCamino();
+            curr_tupl = Pendientes.get(0);
+            current_node = curr_tupl.getNodo();
+            curr_path = curr_tupl.getCamino();
 
-            delete_node(current_tup, ListaPendientes);
+            Pendientes.remove(0);
 
             // Si nos encontramos con el nodo final, habremos terminado.
             if (current_node.equals(nodo_final)){
-                found=true;
-                solucion = current_camino;
+                trobat=true;
+                solucion = curr_path;
                 solucion.add(current_node);
-                System.out.println("\nNº de nodos tratados: "+ListaTratados.size());
-                System.out.println("Coste (tiempo) total por este camino: "+current_tup.getCosteAcumulado());
+                System.out.println("CAMINO ENCONTRADO");
+                System.out.println("Num de nodos tratados: "+Tratados.size());
+                System.out.println("Tiempo del camino: "+curr_tupl.gettiempoAcumulado());
             }
             else {
                 ArrayList<Nodo> sucesores = getSucesores(current_node);
                 // Iteramos sobre todos los sucesores disponibles
                 for(Nodo succ: sucesores){
                     // Ignoramos las casillas ya tratadas
-                    if (!ListaTratados.contains(succ)){
+                    if (!Tratados.contains(succ)){
 
-                        ArrayList<Nodo> new_camino = new ArrayList<>(current_camino);
+                        ArrayList<Nodo> new_camino = new ArrayList<>(curr_path);
                         new_camino.add(current_node);
-                        coste = current_tup.getCosteAcumulado() + calcular_coste(current_node, succ);
-                        valHeu = calcular_valor_estimado(succ, nodo_final, coste, this.heuristica);
+                        tiempo = curr_tupl.gettiempoAcumulado() + calcular_tiempo(current_node, succ);
+                        valHeu = calcular_heuristica(succ, nodo_final, tiempo, this.heuristica);
                         // Añadimos nodo
-                        add(new Tupla(succ, coste, new_camino,valHeu), ListaPendientes);
+                        add(new Tupla(succ, tiempo, new_camino,valHeu), Pendientes);
                     }
                 }
-                ListaTratados.add(current_node);
+                Tratados.add(current_node);
             }
         }
-
         // Retornamos la solucion (null si no encontramos ningun camino)
         return solucion;
     }
-
-    public Collection<Tupla> setNewStructure() { return new ArrayList<>(); }
 
     protected Comparator<Tupla> getComparator() {
         return (o1, o2) -> {
@@ -79,34 +77,48 @@ public abstract class InformedSearch {
         };
     }
 
-    public abstract Tupla next_trip(Collection<Tupla> ListaPendientes);
-
-    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica){
-        // Calculamos el coste de desplazamiento en función de la heuristica que hayamos tomado
-        return switch (heuristica) {
-            // Heuristica 1: Escogemos el desplazamiento con menor coste
-            case 1 -> calcular_coste(current_node, final_node);
-            // Heuristica 2:
-            case 2 -> calcular_coste(current_node, final_node);
-            // Heuristica 3:
-            case 3 -> calcular_coste(current_node, final_node);
+    public int calcular_heuristica(Nodo curr_node, Nodo fi_node, int tiempoAcumulado, int heuristica){
+        // Calculamos el tiempo de desplazamiento en función de la heuristica que hayamos tomado
+        int val;
+        switch (heuristica) {
+            // Heuristica 1: Escogemos el desplazamiento con menor tiempo
+            case 1:
+                val = calcular_tiempo(curr_node, fi_node);
+                break;
+            // Heuristica 2: Evitamos un cambio de carretera
+            case 2:
+                if ( !curr_node.getType().equals(fi_node.getType()) ) {
+                    val = calcular_tiempo(curr_node, fi_node) * 2;
+                }
+                else { val = calcular_tiempo(curr_node, fi_node); }
+                break;
+            // Heuristica 3: Evitamos las carreteras comarcales
+            case 3:
+                if (curr_node.getType().equals("C") ) {
+                    val = calcular_tiempo(curr_node, fi_node) * 2;
+                } else {
+                    val = calcular_tiempo(curr_node, fi_node);
+                }
+                break;
             // Heuristica invalida
-            default -> throw new IllegalStateException("Unexpected value: " + heuristica);
-        };
+            default:
+                throw new IllegalStateException("Unexpected value: " + heuristica);
+        }
+
+        return val;
+
     }
 
-    public int calcular_coste(Nodo nodo_orig, Nodo nodo_desti){
-        // Conseguimos el coste de desplazamiento del nodo destino
-        int value = nodo_desti.getValue();
-        // Si hacemos un cambio de carretera, añadiremos "5" al coste
-        if ( !nodo_orig.getType().equals(nodo_desti.getType()) ) { value += 5; }
+    public int calcular_tiempo(Nodo curr_node, Nodo fi_node){
+        // Conseguimos el tiempo de desplazamiento del nodo destino
+        int value = fi_node.getValue();
+        // Si hacemos un cambio de carretera, añadiremos "5" al tiempo
+        if ( !curr_node.getType().equals(fi_node.getType()) ) { value += 5; }
 
         return value;
     }
 
-    public abstract void add(Tupla trip, Collection<Tupla> ListaPendientes);
-
-    public abstract void delete_node(Tupla trip, Collection<Tupla> ListaPendientes);
+    public abstract void add(Tupla trip, ArrayList<Tupla> Pendientes);
 
     public ArrayList<Nodo> getSucesores(Nodo nodo_actual){
         ArrayList<Nodo> sucesores = new ArrayList<>();
@@ -132,13 +144,13 @@ public abstract class InformedSearch {
 
 class Tupla {
     Nodo node;
-    ArrayList<Nodo> camino;
-    int valorHeuristico, costeAcumulado;
+    ArrayList<Nodo> path;
+    int valorHeuristico, tiempoAcumulado;
 
-    public Tupla(Nodo estado, int costeAcumulado, ArrayList<Nodo> camino, int valorHeuristico){
+    public Tupla(Nodo estado, int tiempoAcumulado, ArrayList<Nodo> camino, int valorHeuristico){
         this.node = estado;
-        this.costeAcumulado = costeAcumulado;
-        this.camino = camino;
+        this.tiempoAcumulado = tiempoAcumulado;
+        this.path = camino;
         this.valorHeuristico = valorHeuristico;
     }
 
@@ -150,13 +162,13 @@ class Tupla {
         }
         else if (object instanceof Tupla){
             // Retornaremos true si el camino es exactamente igual (misma ruta tomada de Nodos)
-            return (this.node.equals(((Tupla) object).getNodo())) && this.camino.equals(((Tupla) object).getCamino());
+            return (this.node.equals(((Tupla) object).getNodo())) && this.path.equals(((Tupla) object).getCamino());
         }
         return false;
     }
 
     @Override
-    public int hashCode() { return this.node.hashCode() + this.camino.hashCode();}
+    public int hashCode() { return this.node.hashCode() + this.path.hashCode();}
 
     // Getters
     public Nodo getNodo(){
@@ -164,23 +176,23 @@ class Tupla {
     }
 
     public ArrayList<Nodo> getCamino(){
-        return this.camino;
+        return this.path;
     }
 
-    public int getCosteAcumulado() { return this.costeAcumulado;}
+    public int gettiempoAcumulado() { return this.tiempoAcumulado;}
 
     public int getValorHeuristico(){
         return this.valorHeuristico;
     }
 }
     class Nodo {
-        int X,Y,value;
+        int X,Y,val;
         String type;
 
-        public Nodo(int X, int Y, int value, String type){
+        public Nodo(int X, int Y, int val, String type){
             this.X = X;
             this.Y = Y;
-            this.value = value;
+            this.val = val;
             this.type = type;
         }
 
@@ -189,7 +201,7 @@ class Tupla {
 
         public int getY() {return this.Y;}
 
-        public int getValue() {return this.value;}
+        public int getValue() {return this.val;}
 
         public String getType() {return this.type;}
 
@@ -197,13 +209,13 @@ class Tupla {
         public boolean equals(Object object){
             if (object instanceof Nodo) {
                 return (this.X == ((Nodo) object).getX()) && (this.Y == ((Nodo) object).getY())
-                        && (this.value == ((Nodo) object).getValue());
+                        && (this.val == ((Nodo) object).getValue());
             } else {
                 return false;
             }
         }
 
         @Override
-        public int hashCode() { return (X+Y) * (value); }
+        public int hashCode() { return (X+Y) * (val); }
 
     }

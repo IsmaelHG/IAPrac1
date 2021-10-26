@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Algoritmo de busqueda informada A*
@@ -15,28 +14,15 @@ public class AStar extends InformedSearch {
     }
 
     @Override
-    public Tupla next_trip(Collection<Tupla> ListaPendientes) {
-        // La lista esta ordenada
-        return ((ArrayList<Tupla>) ListaPendientes).get(0);
-    }
-
-    @Override
-    public void add(Tupla trip, Collection<Tupla> ListaPendientes) {
+    public void add(Tupla trip, ArrayList<Tupla> ListaPendientes) {
         ListaPendientes.add(trip);
-        ((ArrayList) ListaPendientes).sort(getComparator());
+        ListaPendientes.sort(getComparator());
     }
 
     @Override
-    public void delete_node(Tupla trip, Collection<Tupla> ListaPendientes) {
-        ((ArrayList) ListaPendientes).remove(0);
-    }
-
-    @Override
-    public int calcular_valor_estimado(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica) {
+    public int calcular_heuristica(Nodo current_node, Nodo final_node, int costeAcumulado, int heuristica) {
         // Para el algoritmo A* se tendra en cuenta el coste acumulado
         // f(n) = g(n) + h'(n)
-        return costeAcumulado + super.calcular_valor_estimado(current_node, final_node, 0, heuristica);
+        return costeAcumulado + super.calcular_heuristica(current_node, final_node, 0, heuristica);
     }
-
-
 }

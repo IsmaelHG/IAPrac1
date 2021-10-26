@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Algoritmo de busqueda informada BestFirst
@@ -7,7 +6,7 @@ import java.util.Collection;
 public class BestFirst extends InformedSearch {
 
     /**
-     * Inicializa el algoritmo de bussqueda
+     * Inicializa el algoritmo de busqueda
      *
      * @param map Mapa
      */
@@ -16,23 +15,12 @@ public class BestFirst extends InformedSearch {
     }
 
     @Override
-    public Tupla next_trip(Collection<Tupla> ListaPendientes) {
-        // La lista esta ordenada
-        return ((ArrayList<Tupla>) ListaPendientes).get(0);
-    }
-
-    @Override
-    public void add(Tupla trip, Collection<Tupla> ListaPendientes) {
+    public void add(Tupla trip, ArrayList<Tupla> ListaPendientes) {
         if (!ListaPendientes.contains(trip)) {
             ListaPendientes.add(trip);
-            ((ArrayList) ListaPendientes).sort(getComparator());
+            ListaPendientes.sort(getComparator());
         }
 
-    }
-
-    @Override
-    public void delete_node(Tupla trip, Collection<Tupla> ListaPendientes) {
-        ((ArrayList) ListaPendientes).remove(0);
     }
 
 }
